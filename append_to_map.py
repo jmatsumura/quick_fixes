@@ -3,7 +3,7 @@
 # This script is used to refine the output from Sybil's list_protein_clusters.cgi 
 # and will map unique polypeptide names to DB accessions.
 #
-# HOW TO RUN: track_counts.py /path/to/map_file /path/to/out_file 
+# HOW TO RUN: append_to_map.py /path/to/map_file /path/to/out_file 
 #
 # Author: James Matsumura
 
