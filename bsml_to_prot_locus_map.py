@@ -1,10 +1,10 @@
 #!/usr/bin/python
 #
 # The purpose of this script is to map protein ids to cluster sequences
-# given the output of a clovr run. The final file produced will be tab-delimited
-# with two columns, the first being a locus tag and the second a cluster sequence.
+# given the output of a CloVR run. The final file produced will mirror the output of
+# muscle except it will be a single file with all polypeptide IDs replaced with Locus IDs.
 #
-# This script accepts two files:
+# This script accepts three inputs when calling it:
 #
 # 1) path to a file containing the list of relevant BSML files to obtain
 # protein IDs and locus tags
@@ -15,9 +15,6 @@
 # 3) path to the output file
 #
 # HOW TO RUN: bsml_to_prot_locus_map.py bsml.list map.file path_to_outfile.txt
-#
-# Note that the file generated will be found in the directory this script is called
-# from and will be called final_map.tsv
 #
 # Author: James Matsumura
 
