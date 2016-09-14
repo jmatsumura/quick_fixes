@@ -29,14 +29,17 @@ m = open(path_to_map_list, 'r')
 o = open(path_to_outfile, 'w')
 
 pl_map = {}
+lg_map = {}
 
 regex_for_locus = r'identifier="(.*)"\sid='
 regex_for_protid = r'id="(.*)"'
 regex_for_name = r'Name:\s(.*)\s+Len'
 regex_for_final_map = r'(\w+\.\w+\.\d+\.\d)\s+(.*)'
+regex_for_gpn = r'content="(.*)"'
 
 locus = ''
 protid = ''
+gpn = ''
 found_cds = False
 found_locus = False
 
@@ -50,11 +53,14 @@ for line in i:
 	for x in c: # iterate over each individual  bsml file
     
 		if 'Feature class="CDS"' in x: # locus+polypeptide is near
-			found_cds = True	
+			found_cds = True
 
 		elif found_cds == True and found_locus == False: # extract locus within CDS region
-			if 'NCBILocus' in x:
+			if 'gene_product_name' in x:
+				gpn = re.search(regex_for_gpn, x).group(1)
+			elif 'NCBILocus' in x:
 				locus = re.search(regex_for_locus, x).group(1)
+				lg_map[locus] = gpn
 				found_locus = True
 
 		# build map and reset all
@@ -63,6 +69,7 @@ for line in i:
 			pl_map[protid] = locus
 			locus = ''
 			protid = ''
+			gpn = ''
 			found_cds = False
 			found_locus = False
 
@@ -101,7 +108,12 @@ for line in m:
 				print('Protein ID: ' + mapid + ' not found in BSML.')
 
 		elif x.startswith('//'): # print a line to grep for cluster members
-			o.write('cluster_' + str(cnt) + ' ' + '\t'.join(str(j) for j in locus_array) + '\n\n//\n')
+			o.write('cluster_' + str(cnt) + ' ' + '\t'.join(str(j) for j in locus_array))
+
+			for x in locus_array:
+				o.write(x + '\t' + lg_map[x] + '\n')
+
+			o.write('\n\n//\n')
 			cnt += 1
 
 		else: # maintain format of original file
