@@ -17,9 +17,7 @@ trimmedseqset16s = open('./16StrimmedseqsetList.txt', 'w')
 
 k = -1 # offset since first line of dump can be skipped
 for doc in i: # iterate over couchdb dump and extract indices
-	if '"node_type":"project"' in doc:
-		project.write(str(k)+'\n')
-	elif '"node_type":"study"' in doc:
+	if '"node_type":"study"' in doc:
 		study.write(str(k)+'\n')
 	elif '"node_type":"subject"' in doc:
 		subject.write(str(k)+'\n')
@@ -33,5 +31,7 @@ for doc in i: # iterate over couchdb dump and extract indices
 		rawseqset16s.write(str(k)+'\n')
 	elif '"node_type":"16s_trimmed_seq_set"' in doc:
 		trimmedseqset16s.write(str(k)+'\n')
+	elif '"node_type":"project"' in doc:
+		project.write(str(k)+'\n')
 
 	k += 1
