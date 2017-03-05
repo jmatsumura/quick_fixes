@@ -62,18 +62,21 @@ for line in o:
 	else: # current individual
 		if elements[4] == "Payroll - Annual Bonus Accrual":
 			n_entry.append(str(get_num(elements[15])))
+			continue
 
 		else:
-			n_entry.append(elements[9])
-			n_entry.append(elements[16])
 			n_entry = add_blanks(n_entry,1)
-			if prev_val == 0:
-				curr_val = get_num(elements[15]) - original_val
-				prev_val = curr_val
-			else:
-				curr_val = get_num(elements[15]) - prev_val - original_val
-			n_entry.append(str(curr_val))
-			n_entry = add_blanks(n_entry,3)
+
+		n_entry.append(elements[9])
+		n_entry.append(elements[16])
+		n_entry = add_blanks(n_entry,1)
+		if prev_val == 0:
+			curr_val = get_num(elements[15]) - original_val
+			prev_val = curr_val
+		else:
+			curr_val = get_num(elements[15]) - prev_val - original_val
+		n_entry.append(str(curr_val))
+		n_entry = add_blanks(n_entry,3)
 
 # Have to do one last time for the last entry
 n_entry = add_blanks(n_entry,7)
