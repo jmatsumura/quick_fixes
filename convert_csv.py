@@ -25,13 +25,13 @@ o = open(sys.argv[1], 'r')
 n = open(sys.argv[2], 'w')
 
 curr_pers = "" # track the previous individual
-curr_val,prev_val = (0 for i in range(2)) # track the previous amount for that individual
+curr_val,original_val,prev_val = (0 for i in range(3)) # track the previous amount for that individual
 n_entry = [] # build a new row
 
 for line in o:
 
 	line = line.strip('\n')
-	elements = line.split(',')
+	elements = line.split('\t')
 
 	if elements[7] != curr_pers: # New individual build the base of the row
 
@@ -41,23 +41,23 @@ for line in o:
 
 			n.write("{0}\n".format((",").join(n_entry)))
 			n_entry = []
-			curr_val = 0
+			curr_val,original,prev_val = (0 for i in range(3))
 
-		prev_val += get_num(elements[15])
+		original_val += get_num(elements[15])
 		curr_pers = elements[7]
 
 		n_entry.append(elements[0])
-		n = add_blanks(n_entry(2))
+		n_entry = add_blanks(n_entry,2)
 		n_entry.append(elements[7])
 		n_entry.append(elements[8])
 		n_entry.append(elements[9])
-		n = add_blanks(n_entry(1))
+		n_entry = add_blanks(n_entry,1)
 		n_entry.append(elements[11])
 		n_entry.append(elements[13])
 		n_entry.append(elements[16])
-		n = add_blanks(n_entry(1))
+		n_entry = add_blanks(n_entry,1)
 		n_entry.append(str(get_num(elements[15])))
-		n = add_blanks(n_entry(3))
+		n_entry = add_blanks(n_entry,3)
 
 	else: # current individual
 		if elements[4] == "Payroll - Annual Bonus Accrual":
@@ -66,15 +66,17 @@ for line in o:
 		else:
 			n_entry.append(elements[9])
 			n_entry.append(elements[16])
-			n = add_blanks(n_entry(1))
-			print(curr_val)
-			curr_val = get_num(elements[15]) - prev_val
-			print(curr_val)
+			n_entry = add_blanks(n_entry,1)
+			if prev_val == 0:
+				curr_val = get_num(elements[15]) - original_val
+				prev_val = curr_val
+			else:
+				curr_val = get_num(elements[15]) - prev_val - original_val
 			n_entry.append(str(curr_val))
-			n = add_blanks(n_entry(3))
+			n_entry = add_blanks(n_entry,3)
 
 # Have to do one last time for the last entry
-n = add_blanks(n_entry(7))
+n_entry = add_blanks(n_entry,7)
 
 n.write("{0}\n".format((",").join(n_entry)))
 n_entry = []
