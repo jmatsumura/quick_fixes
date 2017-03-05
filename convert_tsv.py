@@ -39,7 +39,7 @@ for line in o:
 			for i in range(7):
 				n_entry.append('')
 
-			n.write("{0}\n".format((",").join(n_entry)))
+			n.write("{0}\n".format(("\t").join(n_entry)))
 			n_entry = []
 			curr_val,original,prev_val = (0 for i in range(3))
 
@@ -78,7 +78,7 @@ for line in o:
 # Have to do one last time for the last entry
 n_entry = add_blanks(n_entry,7)
 
-n.write("{0}\n".format((",").join(n_entry)))
+n.write("{0}\n".format(("\t").join(n_entry)))
 n_entry = []
 
 o.close()
