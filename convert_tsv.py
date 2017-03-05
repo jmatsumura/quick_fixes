@@ -36,12 +36,10 @@ for line in o:
 	if elements[7] != curr_pers: # New individual build the base of the row
 
 		if curr_pers != "": # Not the first entry
-			for i in range(7):
-				n_entry.append('')
-
+			n_entry = add_blanks(n_entry,7)
 			n.write("{0}\n".format(("\t").join(n_entry)))
 			n_entry = []
-			curr_val,original,prev_val = (0 for i in range(3))
+			curr_val,original_val,prev_val = (0 for i in range(3))
 
 		original_val += get_num(elements[15])
 		curr_pers = elements[7]
@@ -64,7 +62,7 @@ for line in o:
 			n_entry.append(str(get_num(elements[15])))
 			continue
 
-		else:
+		elif elements[4] != "Payroll - Base Salary":
 			n_entry = add_blanks(n_entry,1)
 
 		n_entry.append(elements[9])
@@ -75,6 +73,7 @@ for line in o:
 			prev_val = curr_val
 		else:
 			curr_val = get_num(elements[15]) - prev_val - original_val
+			prev_val = curr_val
 		n_entry.append(str(curr_val))
 		n_entry = add_blanks(n_entry,3)
 
