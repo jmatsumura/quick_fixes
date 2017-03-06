@@ -14,7 +14,7 @@ def get_num(number):
 	if number == "":
 		return 0
 	number = number.replace(',','') # remove commas
-	number = number[2:-1]
+	#number = number[2:-1] # change to ignore "$"
 	return int(number)
 
 # Pass the row being built that needs some empty entries added
