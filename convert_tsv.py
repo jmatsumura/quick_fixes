@@ -11,8 +11,10 @@ import sys, re
 
 # String value of a dollar to convert to just an int
 def get_num(number):
+	if number == "":
+		return 0
 	number = number.replace(',','') # remove commas
-	number = number[2:-1]
+	#number = number[2:-1] # change to ignore "$"
 	return int(number)
 
 # Pass the row being built that needs some empty entries added
@@ -30,6 +32,7 @@ n_entry = [] # build a new row
 
 for line in o:
 
+	print(line)
 	line = line.strip('\n')
 	elements = line.split('\t')
 
