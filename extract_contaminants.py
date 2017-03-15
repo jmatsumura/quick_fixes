@@ -35,7 +35,7 @@ with open(sys.argv[1],'r') as input:
 
 		# If we've found all the contaminants, leave
 		elif contaminant_section == True and line.strip() =='':
-			genome = contaminant_list[0].split('\t')[0]
+			genome = contaminant_list[0].split('\t')[0].split('_')[0]
 			with open("{0}/{1}".format(sys.argv[2],genome),'w') as out:
 				for x in contaminant_list:
 					out.write(x)
