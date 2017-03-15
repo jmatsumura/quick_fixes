@@ -21,22 +21,25 @@
 import sys, re
 
 with open(sys.argv[1],'r') as input:
-	with open(sys.argv[2],'w') as output:
 
-		contaminant_section = False
+	contaminant_section = False
+	contaminant_list = []
 
-		for line in input:
-			if line.startswith('Trim:'):
-				contaminant_section = True
+	for line in input:
+		if line.startswith('Trim:'):
+			contaminant_section = True
+			contaminant_list = []
 
-			elif contaminant_section == True and line.startswith('Sequence name'):
-				pass
+		elif contaminant_section == True and line.startswith('Sequence name'):
+			pass
 
-			# If we've found all the contaminants, leave
-			elif contaminant_section == True and line.strip() =='':
-				contaminant_section = False
+		# If we've found all the contaminants, leave
+		elif contaminant_section == True and line.strip() =='':
+			genome = contaminant_list[0].split('\t')[0]
+			with open("{0}/{1}".format(sys.argv[2],genome),'w') as out:
+				for x in contaminant_list:
+					out.write(x)
+			contaminant_section = False
 
-			elif contaminant_section == True:
-				output.write(line)
-
-
+		elif contaminant_section == True:
+			contaminant_list.append(line)
