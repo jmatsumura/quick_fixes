@@ -11,7 +11,7 @@
 # Author: James Matsumura
 
 import argparse,re
-from collections import defaultdict
+from collections import OrderedDict,defaultdict
 from datetime import datetime, timezone
 import numpy as np
 import pandas as pd
@@ -74,15 +74,19 @@ with open(args.input,'r') as infile:
         ppl[person].append(mem)
         ppl[person].append(maxvmem)
 
+sorted_ppl = OrderedDict(sorted(ppl.items()))
+
 with open(args.outfile,'w') as out:
-    for person,vals in ppl.items():
+    for person,vals in sorted_ppl.items():
 
         blocked = [] # track how much mem is requested vs used
 
         for m in range(0,len(vals),2):
             blocked.append(int(vals[m])-int(vals[m+1]))
-
-        out.write("{0}\t{1:.2f}".format(person,sum(blocked)/len(blocked)/1000000000))
+            
+        stdev = np.std(blocked)
+        stdev = (stdev/1000000000) # change to GB
+        out.write("{0}\t{1:.5f}\t{2:.5f}\n".format(person,sum(blocked)/len(blocked)/1000000000,stdev))
 
 tot_mem,tot_vmem,avg_mem,avg_vmem = ([] for i in range(4))
 for day in days:
