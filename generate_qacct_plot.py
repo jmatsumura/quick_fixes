@@ -11,6 +11,7 @@
 # Author: James Matsumura
 
 import argparse,re
+from collections import defaultdict
 from datetime import datetime, timezone
 import numpy as np
 import pandas as pd
@@ -19,12 +20,12 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 parser = argparse.ArgumentParser(description='Script to generate a scatter plot comparing global alignment based ID and reference based ID.')
-parser.add_argument('-input', type=str, required=True, help='Location of second_ids_v_coverage.tsv.')
-parser.add_argument('-month', type=str, required=True, help='Month [01,02,...12].')
-parser.add_argument('-output', type=str, required=True, help='Name of the outputfile.')
+parser.add_argument('-input', type=str, required=True, help='Location of Location of second_ids_v_coverage.tsv.')
+parser.add_argument('-outfile', type=str, required=True, help='Name of the outputfile.')
+parser.add_argument('-outgraph', type=str, required=True, help='Name of the output graph.')
 args = parser.parse_args()
 
-acc = []
+ppl,days = (defaultdict(list) for i in range(2))
 
 # Just extract the coverage ratio
 with open(args.input,'r') as infile:
@@ -32,31 +33,33 @@ with open(args.input,'r') as infile:
 
         if line.startswith("#"):
             continue
+
         line = line.rstrip()
         ele = line.split(':')
 
         starttime = int(ele[9])
         endtime = int(ele[10])
-        if starttime == 0 or endtime == 0:
-            continue
- 
-        month = str(datetime.fromtimestamp(endtime)).split(' ')[0].split('-')[1]
 
-        # If the right month, include the accuracy
-        if month != args.month:
+        # Skip entries that don't have the correct characteristics like...
+        month_day = str(datetime.fromtimestamp(endtime)).split(' ')[0].split('-',1)[1]
+
+        if starttime == 0 or endtime == 0: # start or end times of 0
             continue
             
-        # If failed, skip
-        if int(ele[11]) == 1:
+        if int(ele[11]) == 1: # it failed
             continue
 
-        # If no mem_free, leave
-        if 'mem_free' not in line:
+        if 'mem_free' not in line: # no mem_free specified
             continue
+
+        person = ele[3]
 
         maxvmem = int(ele[-3].split('.')[0])
         mem_req = re.search(r'mem_free=([a-zA-Z0-9]+)',line).group(1)
         g_or_m = mem_req[-1]
+
+        if mem_req == 0 or maxvmem == 0:
+            continue
 
         if not mem_req[-1].isdigit():
             mem = int(mem_req[:-1])
@@ -66,12 +69,26 @@ with open(args.input,'r') as infile:
             elif g_or_m.upper() == "M":
                 mem = mem*1000000
         
-        acc.append(("{0:.2f}").format(maxvmem/mem*100))
+        days[month_day].append("{0}:{1}".format(mem,maxvmem))
 
+        ppl[person].append(mem)
+        ppl[person].append(maxvmem)
 
-df = pd.DataFrame(acc,columns=['Accuracy'])
-splot = sns.boxplot(df[['Accuracy']],showfliers=False)
-splot.set(ylim=(-5,600))
+with open(args.outfile,'w') as out:
+    for person,vals in ppl.items():
 
-fig = splot.get_figure()
-fig.savefig(args.output)
+        blocked = [] # track how much mem is requested vs used
+
+        for m in range(0,len(vals),2):
+            blocked.append(int(vals[m])-int(vals[m+1]))
+
+        out.write("{0}\t{1:.2f}".format(person,sum(blocked)/len(blocked)/1000000000))
+
+tot_mem,tot_vmem,avg_mem,avg_vmem = ([] for i in range(4))
+for day in days:
+    for vals in days[day]:
+        tot_mem.append(int(vals.split(':')[0]))
+        tot_vmem.append(int(vals.split(':')[1]))
+
+    avg_mem.append(sum(tot_mem)/len(tot_mem))
+    avg_vmem.append(sum(tot_vmem)/len(tot_vmem))
