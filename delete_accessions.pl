@@ -46,8 +46,19 @@ open(my $fh, $file) or die "Could not open file '$file' $!";
 while (my $row = <$fh>) {
 	chomp $row;
 	my $acc = $row;
-	my $statement = $dbh->prepare("UPDATE feature,dbxref,feature_dbxref SET feature.is_obsolete=? WHERE dbxref.accession=? AND dbxref.dbxref_id=feature_dbxref.dbxref_id AND feature_dbxref.feature_id=feature.feature_id");
-	$statement->execute($obs_val,$acc);
+	my $statement = $dbh->prepare("SELECT fl2.feature_id FROM featureloc fl2, featureloc fl, feature f, feature_dbxref fd, dbxref d WHERE d.accession=? AND d.dbxref_id=fd.dbxref_id AND fd.feature_id=f.feature_id AND fl.feature_id=f.feature_id AND fl.srcfeature_id=fl2.srcfeature_id AND fl.fmin=fl2.fmin AND fl.fmax=fl2.fmax");
+	$statement->execute($acc);
+
+	my $res = $statement->fetchall_arrayref();
+
+	foreach my $row (@$res){
+		my ($id) = @$row; # only pulling IDs from the previous select
+		my $modify_statement = $dbh->prepare("UPDATE feature SET feature.is_obsolete=? WHERE feature_id=?");
+		$modify_statement->execute($obs_val,$id);
+		$modify_statement->finish();
+	}
+
+	$statement->finish();
 }
 
 $dbh->disconnect();
