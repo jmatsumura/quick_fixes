@@ -2,7 +2,7 @@
 # Script to parse through metagenomic sample XLS files and condense them into
 # a single V6 CSV file compatible with Calypso. 
 
-import argparse, xlrd
+import argparse, xlrd, random
 from collections import defaultdict
 
 parser = argparse.ArgumentParser(description='Script to convert a metadata file split across multiple tabs in XLS format into a single TSV file.')
@@ -45,8 +45,11 @@ for sheet in sheets:
             for col_idx in range(1,current_sheet.ncols):
                 data[current_sheet.cell_value(row_idx,0)].append(current_sheet.cell_value(row_idx,col_idx))
 
+keep_or_not = [0,1]
 
 with open(args.outfile,'w') as output:
+
+    keep_us = set()
 
     output.write("{0}\n".format((',').join(columns)))
 
@@ -57,22 +60,24 @@ with open(args.outfile,'w') as output:
         if len(data[key]) == total_metadata_cols:
             
             paired_id += 1
-            possible = False
 
             for val in possible_ids:
                 if val.startswith(key):
 
+                    keep_us.add(val)
+
                     pair_value = "P{0}".format(paired_id)
-                    mandatory_data = [val,val,pair_value,"1"]
+                    mandatory_data = [val,val,pair_value,random.choice(keep_or_not)]
                     total_metadata = mandatory_data + data[key]
                     converted_metadata = [str(i) for i in total_metadata]
                     output.write((',').join(converted_metadata))
                     output.write("\n")
-                    possible = True
 
-            if possible == False:
-                unique = "{0}{1}".format(key,paired_id)
-                mandatory_data = [unique,unique,"NA","0"]
-                mandatory_data += ["NA"] * (len(data[key]))
-                output.write(','.join(mandatory_data))
-                output.write("\n")
+
+    for id in possible_ids:
+        if id not in keep_us:
+            mandatory_data = [id,id,id,"0"]
+            mandatory_data += ["NA"] * (len(columns)-4)
+            output.write((',').join(mandatory_data))
+            output.write('\n')
+
